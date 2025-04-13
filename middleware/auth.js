@@ -1,21 +1,21 @@
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'secretkey123'; // Should match the one in auth.js
+
+const JWT_SECRET = 'secretkey123'; // move to .env later
 
 const authMiddleware = (req, res, next) => {
-  // Get token from header
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-
-  if (!token) {
-    return res.status(401).json({ error: 'No token, authorization denied' });
-  }
-
   try {
-    // Verify token
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ error: 'Token is not valid' });
+    console.error('❌ Auth error:', err);
+    res.status(401).json({ error: 'Invalid token' });
   }
 };
 

@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "GymFrontend",
+    "slug": "GymFrontend",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "requireFullScreen": true,
+      "infoPlist": {
+        "UIViewControllerBasedStatusBarAppearance": false,
+        "UIStatusBarStyle": "UIStatusBarStyleDarkContent"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "softwareKeyboardLayoutMode": "pan"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png",
+      "meta": {
+        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      }
+    }
+  }
+}

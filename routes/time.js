@@ -393,75 +393,99 @@ Here is the input data for today's workout:
 }`;
 
     // Call Gemini API
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        contents: [{
-          parts: [{ text: prompt }]
-        }]
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    console.log('🔑 GEMINI_API_KEY:', process.env.GEMINI_API_KEY);
+    console.log('🔑 All env variables:', process.env);
     
-    // Log the raw response for debugging
-    console.log('🔍 Raw Gemini response:', JSON.stringify(response.data, null, 2));
+    // Temporarily hardcode the API key for testing
+    const geminiApiKey = 'AIzaSyAPEXaE8LSndZxOTvZbj5Q3OlYDoajiwU0';
     
-    // Extract the suggestion from the response
-    if (!response.data.candidates?.[0]?.content?.parts?.[0]?.text) {
-      console.error('❌ Invalid response structure from Gemini API');
-      console.error('Response:', response.data);
-      return res.status(500).json({ error: 'Invalid response from AI service' });
-    }
-
-    const suggestion = response.data.candidates[0].content.parts[0].text;
-    console.log('📝 Raw suggestion text:', suggestion);
-    
-    // Parse the JSON response
     try {
-      // Try to clean the response if it has any leading/trailing whitespace or markdown
-      const cleanedSuggestion = suggestion.trim().replace(/```json\n?|\n?```/g, '');
-      console.log('🧹 Cleaned suggestion:', cleanedSuggestion);
+      const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+        {
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: 60000, // Increase timeout to 60 seconds
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity
+        }
+      );
       
-      const workoutPlan = JSON.parse(cleanedSuggestion);
-      console.log('✅ Successfully parsed workout plan');
-
-      // Filter out exercises that exceed the available time for LOSINGWEIGHT mode
-      if (workoutPlan.mode === 'LOSINGWEIGHT' && workoutPlan.cardio_options) {
-        const availableTime = workoutPlan.total_time_minutes;
-        
-        // Filter non-gym workouts and round calculated_time_minutes to one decimal place
-        if (workoutPlan.cardio_options.non_gym_workout) {
-          workoutPlan.cardio_options.non_gym_workout = workoutPlan.cardio_options.non_gym_workout
-            .filter(exercise => exercise.calculated_time_minutes <= availableTime)
-            .map(exercise => ({
-              ...exercise,
-              calculated_time_minutes: Number(exercise.calculated_time_minutes.toFixed(1))
-            }));
-        }
-        
-        // Filter gym workouts and round calculated_time_minutes to one decimal place
-        if (workoutPlan.cardio_options.gym_workout) {
-          workoutPlan.cardio_options.gym_workout = workoutPlan.cardio_options.gym_workout
-            .filter(exercise => exercise.calculated_time_minutes <= availableTime)
-            .map(exercise => ({
-              ...exercise,
-              calculated_time_minutes: Number(exercise.calculated_time_minutes.toFixed(1))
-            }));
-        }
+      // Log the raw response for debugging
+      console.log('🔍 Raw Gemini response:', JSON.stringify(response.data, null, 2));
+      
+      // Extract the suggestion from the response
+      if (!response.data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        console.error('❌ Invalid response structure from Gemini API');
+        console.error('Response:', response.data);
+        return res.status(500).json({ error: 'Invalid response from AI service' });
       }
 
-      res.json(workoutPlan);
+      const suggestion = response.data.candidates[0].content.parts[0].text;
+      console.log('📝 Raw suggestion text:', suggestion);
+      
+      // Parse the JSON response
+      try {
+        // Try to clean the response if it has any leading/trailing whitespace or markdown
+        const cleanedSuggestion = suggestion.trim().replace(/```json\n?|\n?```/g, '');
+        console.log('🧹 Cleaned suggestion:', cleanedSuggestion);
+        
+        const workoutPlan = JSON.parse(cleanedSuggestion);
+        console.log('✅ Successfully parsed workout plan');
+
+        // Filter out exercises that exceed the available time for LOSINGWEIGHT mode
+        if (workoutPlan.mode === 'LOSINGWEIGHT' && workoutPlan.cardio_options) {
+          const availableTime = workoutPlan.total_time_minutes;
+          
+          // Filter non-gym workouts and round calculated_time_minutes to one decimal place
+          if (workoutPlan.cardio_options.non_gym_workout) {
+            workoutPlan.cardio_options.non_gym_workout = workoutPlan.cardio_options.non_gym_workout
+              .filter(exercise => exercise.calculated_time_minutes <= availableTime)
+              .map(exercise => ({
+                ...exercise,
+                calculated_time_minutes: Number(exercise.calculated_time_minutes.toFixed(1))
+              }));
+          }
+          
+          // Filter gym workouts and round calculated_time_minutes to one decimal place
+          if (workoutPlan.cardio_options.gym_workout) {
+            workoutPlan.cardio_options.gym_workout = workoutPlan.cardio_options.gym_workout
+              .filter(exercise => exercise.calculated_time_minutes <= availableTime)
+              .map(exercise => ({
+                ...exercise,
+                calculated_time_minutes: Number(exercise.calculated_time_minutes.toFixed(1))
+              }));
+          }
+        }
+
+        res.json(workoutPlan);
+      } catch (err) {
+        console.error('❌ Error parsing workout suggestion:', err);
+        console.error('Failed to parse text:', suggestion);
+        res.status(500).json({ 
+          error: 'Failed to parse workout suggestion. Please try again.',
+          details: err.message
+        });
+      }
     } catch (err) {
-      console.error('❌ Error parsing workout suggestion:', err);
-      console.error('Failed to parse text:', suggestion);
-      res.status(500).json({ 
-        error: 'Failed to parse workout suggestion. Please try again.',
-        details: err.message
-      });
+      console.error('❌ Error generating suggestion:', err);
+      if (err.code === 'ECONNABORTED') {
+        res.status(504).json({ error: 'Request to AI service timed out. Please try again.' });
+      } else if (err.response?.status === 403) {
+        res.status(500).json({ error: 'AI service configuration error. Please contact support.' });
+      } else {
+        console.error('Full error:', err);
+        res.status(500).json({ 
+          error: 'Failed to generate workout suggestion. Please try again.',
+          details: err.message
+        });
+      }
     }
   } catch (err) {
     console.error('❌ Error generating suggestion:', err);

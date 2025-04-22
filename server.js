@@ -34,9 +34,7 @@ app.use(express.json());
 app.use('/videos', express.static(path.join(__dirname, 'routes/videos')));
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/dialedin', {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
 })
@@ -119,5 +117,17 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🌐 Server accessible at http://localhost:${PORT}`);
-  console.log(`🌐 Server accessible at http://10.245.175.66:${PORT}`);
+  
+  // Get all network interfaces
+  const { networkInterfaces } = require('os');
+  const nets = networkInterfaces();
+  
+  // Log all available IP addresses
+  Object.keys(nets).forEach((name) => {
+    nets[name].forEach((net) => {
+      if (net.family === 'IPv4' && !net.internal) {
+        console.log(`🌐 Server accessible at http://${net.address}:${PORT}`);
+      }
+    });
+  });
 });

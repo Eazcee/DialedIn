@@ -129,12 +129,12 @@ export default function WorkoutFlowScreen() {
         date: formattedDate,
         activity: workoutPlan.workout_goal,
         duration: workoutPlan.total_time_minutes,
-        calories: workoutPlan.workout_goal === 'fat_loss' ? 300 : 0,
+        calories: 300,  // Set a default calorie burn for muscle gain workouts
         exercises: Object.entries(workoutPlan.exercises || {}).map(([muscleGroup, exerciseGroup]) => ({
           name: exerciseGroup.primary.name,
           sets: exerciseGroup.primary.sets,
           reps: exerciseGroup.primary.reps,
-          weight: exerciseGroup.primary.weight || 0,
+          weight: 10,  // Set a default weight of 10kg for muscle gain exercises
           muscle_groups: [muscleGroup]
         }))
       };

@@ -394,14 +394,10 @@ Here is the input data for today's workout:
 
     // Call Gemini API
     console.log('🔑 GEMINI_API_KEY:', process.env.GEMINI_API_KEY);
-    console.log('🔑 All env variables:', process.env);
-    
-    // Temporarily hardcode the API key for testing
-    const geminiApiKey = 'AIzaSyAPEXaE8LSndZxOTvZbj5Q3OlYDoajiwU0';
     
     try {
       const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
         {
           contents: [{
             parts: [{ text: prompt }]

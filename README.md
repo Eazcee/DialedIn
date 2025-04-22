@@ -1,50 +1,96 @@
-# Welcome to your Expo app 👋
+# DialedIn - Fitness Workout App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native fitness app that provides personalized workout plans and tracks your fitness progress.
 
-## Get started
+## Prerequisites
 
-1. Install dependencies
+- Node.js (v14 or higher)
+- npm or yarn
+- MongoDB (local installation or MongoDB Atlas account)
+- Expo CLI (`npm install -g expo-cli`)
 
+## Setup Instructions
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd DialedIn
+   ```
+
+2. **Install dependencies**
    ```bash
    npm install
+   # or
+   yarn install
    ```
 
-2. Start the app
+3. **Configure environment variables**
+   - Copy `.env.example` to `.env`
+   - Update the following variables in `.env`:
+     ```
+     MONGODB_URI=mongodb://localhost:27017/dialedin
+     PORT=3000
+     JWT_SECRET=your_secret_key_here
+     GEMINI_API_KEY=your_gemini_api_key_here
+     ```
 
+4. **Set up MongoDB**
+   - Install MongoDB locally or use MongoDB Atlas
+   - If using local MongoDB, make sure it's running on port 27017
+   - If using MongoDB Atlas, update the MONGODB_URI in `.env` with your connection string
+
+5. **Get a Gemini API key**
+   - Go to https://makersuite.google.com/app/apikey
+   - Create a new API key
+   - Add the key to your `.env` file
+
+6. **Start the backend server**
    ```bash
-    npx expo start
+   npm start
+   # or
+   yarn start
    ```
 
-In the output, you'll find options to open the app in a
+7. **Start the Expo development server**
+   ```bash
+   npx expo start
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+8. **Run the app**
+   - Press 'i' to run on iOS simulator
+   - Press 'a' to run on Android emulator
+   - Scan the QR code with Expo Go app on your physical device
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Physical Device Testing
 
-## Get a fresh project
+If you want to test the app on a physical device:
 
-When you're ready, run:
+1. Find your computer's local IP address:
+   - On macOS/Linux: `ifconfig` or `ip addr`
+   - On Windows: `ipconfig`
 
-```bash
-npm run reset-project
-```
+2. Update the API_URL in `config.js`:
+   ```javascript
+   export const API_URL = 'http://YOUR_LOCAL_IP:3000/api';
+   ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+3. Make sure your phone is on the same WiFi network as your computer
 
-## Learn more
+## Troubleshooting
 
-To learn more about developing your project with Expo, look at the following resources:
+- **MongoDB Connection Issues**: Make sure MongoDB is running and accessible
+- **API Connection Issues**: Check that the backend server is running and the API_URL is correct
+- **Expo Build Issues**: Try clearing the Expo cache with `expo start -c`
+- **Missing Video Files**: The app will still work without video files, but exercise demonstrations won't be available
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Project Structure
 
-## Join the community
+- `/app` - React Native screens and components
+- `/routes` - Backend API routes
+- `/models` - MongoDB models
+- `/config` - Configuration files
+- `/components` - Reusable React components
 
-Join our community of developers creating universal apps.
+## License
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+[Your License Here]

@@ -1,6 +1,6 @@
 // API Configuration
-// export const API_URL = 'http://localhost:5000/api';
-// export const API_URL = 'http://localhost:3000/api';
+// Use localhost by default for local development
+export const API_URL = 'http://localhost:3000/api';
 
-// Using actual IP address for physical device testing
-export const API_URL = 'http://10.245.175.66:3000/api'; 
+// Uncomment and modify the line below if you need to use a specific IP address for physical device testing
+// export const API_URL = 'http://YOUR_LOCAL_IP:3000/api'; 

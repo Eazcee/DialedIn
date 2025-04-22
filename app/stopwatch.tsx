@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert, Modal } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert, Modal, SafeAreaView, ScrollView } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { colors } from '../config/colors';
@@ -7,10 +7,29 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+type ActivityType = 'Swimming' | 'Running' | 'Walking' | 'Jump rope' | 'Biking' | 
+                   'Treadmill' | 'Stair Master' | 'Elliptical' | 'Indoor Bike' | 'Rowing Machine';
+
+// MET values for different activities
+const MET_VALUES: Record<ActivityType, number> = {
+  // Non-gym workouts
+  "Swimming": 8.0,
+  "Running": 9.8,
+  "Walking": 4.3,
+  "Jump rope": 12.3,
+  "Biking": 8.0,
+  // Gym workouts
+  "Treadmill": 8.3,
+  "Stair Master": 9.0,
+  "Elliptical": 5.0,
+  "Indoor Bike": 7.0,
+  "Rowing Machine": 8.0
+};
+
 export default function StopwatchScreen() {
   const params = useLocalSearchParams();
   const workoutPlan = JSON.parse(decodeURIComponent(params.workoutPlan as string));
-  const activity = params.activity as string;
+  const activity = params.activity as ActivityType;
   
   // Find the activity details from the workout plan
   const activityDetails = workoutPlan.cardio_options?.non_gym_workout?.find(
@@ -19,8 +38,8 @@ export default function StopwatchScreen() {
     (option: any) => option.name === activity
   );
 
-  const [time, setTime] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
+  const [time, setTime] = useState<number>(0);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
@@ -67,11 +86,12 @@ export default function StopwatchScreen() {
         return;
       }
 
-      // Calculate minutes from seconds
-      const minutes = Math.floor(time / 60);
+      // Calculate minutes from seconds, ensure at least 1 minute
+      const minutes = Math.max(1, Math.floor(time / 60));
       
-      // Calculate calories burned
-      const caloriesBurned = Math.round((activityDetails.met_value * (workoutPlan.bmi || 22) * minutes) / 24);
+      // Calculate calories burned with a default BMI of 22 if workoutPlan is not available
+      const defaultBMI = 22;
+      const caloriesBurned = Math.max(1, Math.round((MET_VALUES[activity] * defaultBMI * minutes) / 24));
       
       // Get today's date in YYYY-MM-DD format
       const today = new Date();
@@ -86,7 +106,7 @@ export default function StopwatchScreen() {
         exercises: [{
           name: activity,
           sets: 1,
-          reps: minutes,
+          reps: minutes,  // Use minutes as reps for cardio exercises
           muscle_groups: ['cardio']
         }]
       };
@@ -163,7 +183,7 @@ export default function StopwatchScreen() {
             <Text style={styles.activityDetailsTitle}>Activity Details</Text>
             <View style={styles.activityDetailsRow}>
               <Text style={styles.activityDetailsLabel}>MET Value:</Text>
-              <Text style={styles.activityDetailsValue}>{activityDetails.met_value}</Text>
+              <Text style={styles.activityDetailsValue}>{MET_VALUES[activity]}</Text>
             </View>
             <View style={styles.activityDetailsRow}>
               <Text style={styles.activityDetailsLabel}>Intensity:</Text>
@@ -231,7 +251,7 @@ export default function StopwatchScreen() {
             </Text>
             
             <Text style={styles.modalDetails}>
-              Calories Burned: {Math.round((activityDetails.met_value * (workoutPlan.bmi || 22) * Math.floor(time / 60)) / 24)} kcal
+              Calories Burned: {Math.round((MET_VALUES[activity] * (workoutPlan.bmi || 22) * Math.floor(time / 60)) / 24)} kcal
             </Text>
             
             <View style={styles.modalButtonsContainer}>

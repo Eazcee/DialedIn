@@ -1,35 +1,30 @@
 {
   "expo": {
-    "name": "GymFrontend",
-    "slug": "GymFrontend",
+    "name": "DialedIn",
+    "slug": "dialed-in",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true,
-      "requireFullScreen": true,
-      "infoPlist": {
-        "UIViewControllerBasedStatusBarAppearance": false,
-        "UIStatusBarStyle": "UIStatusBarStyleDarkContent"
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "softwareKeyboardLayoutMode": "pan"
+      }
     },
     "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png",
-      "meta": {
-        "viewport": "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-      }
+      "favicon": "./assets/favicon.png"
     }
   }
 }
